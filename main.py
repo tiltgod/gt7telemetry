@@ -486,10 +486,16 @@ checkbox_group.on_change("active", always_record_checkbox_handler)
 
 race_time_table.t_lap_times.width=900
 
-def center_row(*items):
+def center_row(*items, **kwargs):
     """Wrap children in a centered Row"""
-    return Row(*items, sizing_mode="stretch_width", align="center")
+    return Row(*items, sizing_mode="stretch_width", align="start", **kwargs)
 
+help_txt = Div(
+    text="""<p style='color:black; font-size:14px;'>Record replay - select this before record reference or leader board</p>
+    <p style='color:black; font-size:14px;'>log a lap now - even you have not crossed the finished line. This is helpful for missions or license tests</p""",
+    width=400,
+    height=30
+)
 l1 = Column(
     center_row(
         get_help_div(gt7help.HEADER),
@@ -512,11 +518,12 @@ l1 = Column(
         get_help_div(gt7help.TIME_DIFF),
         race_diagram.f_time_diff,
         Column(manual_log_button, checkbox_group, reference_lap_select),
+        help_txt,
         get_help_div(gt7help.MANUAL_CONTROLS),
     ),
     center_row(get_help_div(gt7help.SPEED_DIAGRAM), race_diagram.f_speed, s_race_line, get_help_div(gt7help.RACE_LINE_MINI)),
     center_row(get_help_div(gt7help.SPEED_VARIANCE), race_diagram.f_speed_variance, div_deviance_laps_on_display, get_help_div(gt7help.SPEED_VARIANCE)),
-    center_row(get_help_div(gt7help.THROTTLE_DIAGRAM), race_diagram.f_throttle, div_speed_peak_valley_diagram, get_help_div(gt7help.SPEED_PEAKS_AND_VALLEYS)),
+    center_row(get_help_div(gt7help.THROTTLE_DIAGRAM), race_diagram.f_throttle, div_speed_peak_valley_diagram, get_help_div(gt7help.SPEED_PEAKS_AND_VALLEYS), height=250),
     center_row(get_help_div(gt7help.YAW_RATE_DIAGRAM), race_diagram.f_yaw_rate),
     center_row(get_help_div(gt7help.BRAKING_DIAGRAM), race_diagram.f_braking),
     center_row(get_help_div(gt7help.COASTING_DIAGRAM), race_diagram.f_coasting),
@@ -526,11 +533,12 @@ l1 = Column(
     center_row(get_help_div(gt7help.TIRE_DIAGRAM), race_diagram.f_tires),
     center_row(
         get_help_div(gt7help.TIME_TABLE),
-        race_time_table.t_lap_times,
+        race_time_table.t_lap_times,height=250
     ),
     center_row(
         get_help_div(gt7help.FUEL_MAP),
-        div_fuel_map,
+        div_fuel_map,height=300
+    ),center_row(
         get_help_div(gt7help.TUNING_INFO),
         div_tuning_info,
     ),align="center", sizing_mode="stretch_width",
@@ -560,24 +568,17 @@ tabs = Tabs(
     sizing_mode="stretch_both"
 )
 
-# Your app_root with tabs/plots
 app_root = Column(
     tabs,
-    sizing_mode="stretch_both",
-    width_policy="max",
-    max_width=1920,
-    min_height=600,
-    min_width=800
+    width=1920,           # fixed width
+    sizing_mode="stretch_height"
 )
 
-# Center horizontally and force full-page height
 container = Row(
     Spacer(sizing_mode="stretch_width"),
     app_root,
     Spacer(sizing_mode="stretch_width"),
-    sizing_mode="stretch_both",
-    min_height=600,
-    min_width=800
+    sizing_mode="stretch_both"
 )
 
 # 🔑 Give a name so templates/index.html can reference it
