@@ -7,7 +7,7 @@ from typing import List
 
 import bokeh.application
 from bokeh.driving import linear
-from bokeh.layouts import layout
+from bokeh.layouts import layout, Row, Column, Spacer
 from bokeh.models import (
     Select,
     Paragraph,
@@ -16,6 +16,7 @@ from bokeh.models import (
     DataTable,
     Button,
     Div, CheckboxGroup, TabPanel, Tabs,
+    Spacer
 )
 from bokeh.palettes import Plasma11 as palette
 from bokeh.plotting import curdoc
@@ -104,8 +105,10 @@ def update_race_lines(laps: List[Lap], reference_lap: Lap):
 
 
 def update_header_line(div: Div, last_lap: Lap, reference_lap: Lap):
-    div.text = f"<p><b>Last Lap: {last_lap.title} ({last_lap.car_name()})<b></p>" \
-               f"<p><b>Reference Lap: {reference_lap.title} ({reference_lap.car_name()})<b></p>"
+    div.text = (
+        f"<p style='color: black;'><b>Last Lap: {last_lap.title} ({last_lap.car_name()})</b></p>"
+        f"<p style='color: black;'><b>Reference Lap: {reference_lap.title} ({reference_lap.car_name()})</b></p>"
+    )
 
 def update_lap_change():
     """
@@ -474,51 +477,120 @@ div_gt7_dashboard.text = f"<a href='https://github.com/snipem/gt7dashboard' targ
 
 LABELS = ["Record Replays"]
 
-checkbox_group = CheckboxGroup(labels=LABELS, active=[1])
+checkbox_group = CheckboxGroup(
+    labels=LABELS,
+    active=[1],
+    css_classes=["white-label"]   # add a custom class
+)
 checkbox_group.on_change("active", always_record_checkbox_handler)
 
 race_time_table.t_lap_times.width=900
 
-l1 = layout(
-    children=[
-        [get_help_div(gt7help.HEADER), div_connection_info, div_gt7_dashboard, div_header_line, reset_button, save_button, select_title, select, get_help_div(gt7help.LAP_CONTROLS)],
-        [get_help_div(gt7help.TIME_DIFF), race_diagram.f_time_diff, layout(children=[manual_log_button, checkbox_group, reference_lap_select]), get_help_div(gt7help.MANUAL_CONTROLS)],
-        [get_help_div(gt7help.SPEED_DIAGRAM), race_diagram.f_speed, s_race_line, get_help_div(gt7help.RACE_LINE_MINI)],
-        [get_help_div(gt7help.SPEED_VARIANCE), race_diagram.f_speed_variance, div_deviance_laps_on_display, get_help_div(gt7help.SPEED_VARIANCE)],
-        [get_help_div(gt7help.THROTTLE_DIAGRAM), race_diagram.f_throttle, div_speed_peak_valley_diagram, get_help_div(gt7help.SPEED_PEAKS_AND_VALLEYS)],
-        [get_help_div(gt7help.YAW_RATE_DIAGRAM), race_diagram.f_yaw_rate],
-        [get_help_div(gt7help.BRAKING_DIAGRAM), race_diagram.f_braking],
-        [get_help_div(gt7help.COASTING_DIAGRAM), race_diagram.f_coasting],
-        [get_help_div(gt7help.GEAR_DIAGRAM), race_diagram.f_gear],
-        [get_help_div(gt7help.RPM_DIAGRAM), race_diagram.f_rpm],
-        [get_help_div(gt7help.BOOST_DIAGRAM), race_diagram.f_boost],
-        [get_help_div(gt7help.TIRE_DIAGRAM), race_diagram.f_tires],
-        [get_help_div(gt7help.TIME_TABLE), race_time_table.t_lap_times, get_help_div(gt7help.FUEL_MAP), div_fuel_map, get_help_div(gt7help.TUNING_INFO), div_tuning_info],
-    ]
+def center_row(*items):
+    """Wrap children in a centered Row"""
+    return Row(*items, sizing_mode="stretch_width", align="center")
+
+l1 = Column(
+    center_row(
+        get_help_div(gt7help.HEADER),
+        div_connection_info,
+        div_gt7_dashboard,
+        div_header_line,
+        select_title,
+        select,
+        get_help_div(gt7help.LAP_CONTROLS),
+    ),
+        # reset + save buttons separated
+    Row(Spacer(height=30)),
+    Row(
+        reset_button,
+        Spacer(width=20),   # <-- add space here
+        save_button,
+        sizing_mode="stretch_width"
+    ),
+    center_row(
+        get_help_div(gt7help.TIME_DIFF),
+        race_diagram.f_time_diff,
+        Column(manual_log_button, checkbox_group, reference_lap_select),
+        get_help_div(gt7help.MANUAL_CONTROLS),
+    ),
+    center_row(get_help_div(gt7help.SPEED_DIAGRAM), race_diagram.f_speed, s_race_line, get_help_div(gt7help.RACE_LINE_MINI)),
+    center_row(get_help_div(gt7help.SPEED_VARIANCE), race_diagram.f_speed_variance, div_deviance_laps_on_display, get_help_div(gt7help.SPEED_VARIANCE)),
+    center_row(get_help_div(gt7help.THROTTLE_DIAGRAM), race_diagram.f_throttle, div_speed_peak_valley_diagram, get_help_div(gt7help.SPEED_PEAKS_AND_VALLEYS)),
+    center_row(get_help_div(gt7help.YAW_RATE_DIAGRAM), race_diagram.f_yaw_rate),
+    center_row(get_help_div(gt7help.BRAKING_DIAGRAM), race_diagram.f_braking),
+    center_row(get_help_div(gt7help.COASTING_DIAGRAM), race_diagram.f_coasting),
+    center_row(get_help_div(gt7help.GEAR_DIAGRAM), race_diagram.f_gear),
+    center_row(get_help_div(gt7help.RPM_DIAGRAM), race_diagram.f_rpm),
+    center_row(get_help_div(gt7help.BOOST_DIAGRAM), race_diagram.f_boost),
+    center_row(get_help_div(gt7help.TIRE_DIAGRAM), race_diagram.f_tires),
+    center_row(
+        get_help_div(gt7help.TIME_TABLE),
+        race_time_table.t_lap_times,
+    ),
+    center_row(
+        get_help_div(gt7help.FUEL_MAP),
+        div_fuel_map,
+        get_help_div(gt7help.TUNING_INFO),
+        div_tuning_info,
+    ),align="center", sizing_mode="stretch_width",
 )
 
-
-
-
 l2, race_lines, race_lines_data = get_race_lines_layout(number_of_race_lines=1)
+l2.sizing_mode = "scale_both"
+l2.min_width = 600
+l2.min_height = 400
 
 l3 = layout(
     [
         [reset_button, save_button],
         [div_speed_peak_valley_diagram, div_fuel_map], # TODO Race table does not render twice, one rendering will be empty
-     ],
-    sizing_mode="stretch_width",
+     ],sizing_mode="scale_both"
 )
+l3.min_width = 600
+l3.min_height = 400
 
-#  Setup the tabs
+# Setup the tabs
 tab1 = TabPanel(child=l1, title="Get Faster")
 tab2 = TabPanel(child=l2, title="Race Lines")
 tab3 = TabPanel(child=l3, title="Race")
-tabs = Tabs(tabs=[tab1, tab2, tab3])
 
-curdoc().add_root(tabs)
+tabs = Tabs(
+    tabs=[tab1, tab2, tab3],
+    sizing_mode="stretch_both"
+)
+
+# Your app_root with tabs/plots
+app_root = Column(
+    tabs,
+    sizing_mode="stretch_both",
+    width_policy="max",
+    max_width=1920,
+    min_height=600,
+    min_width=800
+)
+
+# Center horizontally and force full-page height
+container = Row(
+    Spacer(sizing_mode="stretch_width"),
+    app_root,
+    Spacer(sizing_mode="stretch_width"),
+    sizing_mode="stretch_both",
+    min_height=600,
+    min_width=800
+)
+
+# 🔑 Give a name so templates/index.html can reference it
+container.name = "app_root"
+
+# Add to curdoc once
+curdoc().add_root(container)
 curdoc().title = "GT7 Dashboard"
+curdoc().template_variables["app_root"] = container
 
-# This will only trigger once per lap, but we check every second if anything happened
+# Periodic updates
 curdoc().add_periodic_callback(update_lap_change, 1000)
 curdoc().add_periodic_callback(update_fuel_map, 5000)
+
+logger.info(f"Roots in curdoc: {curdoc().roots}")
+logger.info(f"Root names: {[r.name for r in curdoc().roots]}")

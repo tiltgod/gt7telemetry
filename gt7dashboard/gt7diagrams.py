@@ -238,7 +238,8 @@ class RaceDiagram(object):
             x_range=self.f_speed.x_range,
             y_axis_label="Time / Diff",
             width=width,
-            height=int(self.f_speed.height / 2),
+            # height=int(self.f_speed.height / 2),
+            height=250,
             tooltips=tooltips_timedelta,
             active_drag="box_zoom",
         )
